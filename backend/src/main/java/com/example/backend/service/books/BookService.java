@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -33,9 +34,10 @@ public class BookService implements IBookService {
     private LibraryMapper libraryMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookDTO> getAllBooks() {
         logger.info("Fetching all books from the database");
-        return bookRepository.findAll().stream()
+        return bookRepository.findByDeletedFalse().stream()
                 .map(book -> {
                     BookDTO bookDTO = libraryMapper.toBookDTO(book);
                     List<Author> authors = bookRepository.findAuthorsByBookId(book.getBookId());
@@ -48,6 +50,7 @@ public class BookService implements IBookService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BookDTO getBookById(Long bookId) {
         logger.info("Fetching book with id: {}", bookId);
         Book book = bookRepository.findById(bookId)
@@ -61,13 +64,16 @@ public class BookService implements IBookService {
     }
 
     @Override
+    @Transactional
     public BookDTO createBook(BookDTO bookDTO) {
         logger.info("Creating a new book");
         Book book = new Book();
         book.setTitle(bookDTO.getTitle());
         book.setIsbn(bookDTO.getIsbn());
         book.setPublicationYear(bookDTO.getPublicationYear());
-        book.setStatus(Book.BookStatus.valueOf(bookDTO.getStatus()));
+        if (bookDTO.getStatus() != null) {
+            book.setStatus(Book.BookStatus.valueOf(bookDTO.getStatus()));
+        }
         book.setCoverImageUrl(bookDTO.getCoverImageUrl());
 
         Set<Author> authors = getPersistedAuthors(bookDTO.getAuthors());
@@ -79,10 +85,14 @@ public class BookService implements IBookService {
     }
 
     @Override
+    @Transactional
     public BookDTO updateBook(Long bookId, BookDTO bookDTO) {
         logger.info("Updating book with id: {}", bookId);
         Book existingBook = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + bookId));
+        if (existingBook.isDeleted()) {
+            throw new IllegalStateException("Cannot update a deleted book");
+        }
 
         if (bookDTO.getTitle() != null) {
             existingBook.setTitle(bookDTO.getTitle());
@@ -113,12 +123,14 @@ public class BookService implements IBookService {
     }
 
     @Override
+    @Transactional
     public void deleteBook(Long bookId) {
-        logger.info("Deleting book with id: {}", bookId);
+        logger.info("Soft-deleting book with id: {}", bookId);
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + bookId));
-        bookRepository.delete(book);
-        logger.info("Book deleted successfully with id: {}", bookId);
+        book.setDeleted(true);
+        bookRepository.save(book);
+        logger.info("Book soft-deleted successfully with id: {}", bookId);
     }
 
     private Set<Author> getPersistedAuthors(Set<AuthorDTO.AuthorSummaryDTO> authorDTOs) {
