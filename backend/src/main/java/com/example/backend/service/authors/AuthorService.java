@@ -6,11 +6,11 @@ import com.example.backend.mapper.LibraryMapper;
 import com.example.backend.model.Author;
 import com.example.backend.model.Book;
 import com.example.backend.repository.AuthorRepository;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,12 +26,13 @@ public class AuthorService implements IAuthorService {
     private LibraryMapper libraryMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<AuthorDTO> getAllAuthors() {
         logger.info("Fetching all authors from the database");
-        return authorRepository.findAll().stream()
+        return authorRepository.findByDeletedFalse().stream()
                 .map(author -> {
                     AuthorDTO authorDTO = libraryMapper.toAuthorDTO(author);
-                    List<Book> books = authorRepository.findBooksByAuthorId(author.getAuthorId());
+                    List<Book> books = authorRepository.findActiveBooksByAuthorId(author.getAuthorId());
                     authorDTO.setBooks(books.stream()
                             .map(libraryMapper::toBookSummaryDTO)
                             .collect(Collectors.toSet()));
@@ -40,6 +41,7 @@ public class AuthorService implements IAuthorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AuthorDTO getAuthorById(Long authorId) {
         logger.info("Fetching author with id: {}", authorId);
         Author author = authorRepository.findById(authorId)
@@ -53,6 +55,7 @@ public class AuthorService implements IAuthorService {
     }
 
     @Override
+    @Transactional
     public AuthorDTO createAuthor(AuthorDTO authorDTO) {
         logger.info("Creating a new author");
         Author author = libraryMapper.toAuthorEntity(authorDTO);
@@ -62,10 +65,14 @@ public class AuthorService implements IAuthorService {
     }
 
     @Override
+    @Transactional
     public AuthorDTO updateAuthor(Long authorId, AuthorDTO authorDTO) {
         logger.info("Updating author with id: {}", authorId);
         Author existingAuthor = authorRepository.findById(authorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Author not found with id: " + authorId));
+        if (existingAuthor.isDeleted()) {
+            throw new IllegalStateException("Cannot update a deleted author");
+        }
 
         if (authorDTO.getName() != null) {
             existingAuthor.setName(authorDTO.getName());
@@ -82,17 +89,14 @@ public class AuthorService implements IAuthorService {
         return libraryMapper.toAuthorDTO(updatedAuthor);
     }
 
+    @Override
     @Transactional
     public void deleteAuthor(Long authorId) {
-        logger.info("Deleting author with id: {}", authorId);
+        logger.info("Soft-deleting author with id: {}", authorId);
         Author author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Author not found with id: " + authorId));
-
-        for (Book book : author.getBooks()) {
-            book.getAuthors().remove(author);
-        }
-
-        authorRepository.delete(author);
-        logger.info("Author deleted successfully with id: {}", authorId);
+        author.setDeleted(true);
+        authorRepository.save(author);
+        logger.info("Author soft-deleted successfully with id: {}", authorId);
     }
 }
