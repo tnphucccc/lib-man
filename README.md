@@ -44,22 +44,62 @@ The system is built using Java SpringBoot for the backend and React for frontend
 |   8   |      Tran Quoc Bao      | ITITWE20033 |
 
 ### How to Run
+
+#### Option 1: Docker (Recommended)
+
+Only requires [Docker](https://docs.docker.com/get-docker/) installed.
+
+1. Clone the repo
+   ```sh
+   git clone https://github.com/tnphucccc/LibMan.git
+   cd LibMan
+   ```
+2. Start the full stack
+   ```sh
+   docker compose up --build
+   ```
+3. Open your browser and go to `http://localhost:5173/`
+   - API: `http://localhost:8080/api/v1`
+   - Swagger: `http://localhost:8080/swagger-ui.html`
+   - Credentials: `librarian` / `CHANGE_ME`
+
+To stop and reset data:
+```sh
+docker compose down -v
+```
+
+#### Option 2: Manual Setup
+
+Requires Java 17+, Maven, Node.js 20+, and PostgreSQL 16+.
+
 1. Clone the repo
    ```sh
    git clone https://github.com/tnphucccc/LibMan.git
    ```
-2. Run the backend
+2. Set up the database
    ```sh
-    cd backend
-    mvn spring-boot:run
-    ```
-3. Run the frontend
-    ```sh
-     cd frontend
-     npm install
-     npm run start
-     ```
-4. Open your browser and go to `http://localhost:5173/`
+   createdb libman
+   psql -d libman -f backend/src/main/resources/schema.sql
+   psql -d libman -f backend/src/main/resources/query.sql  # optional seed data
+   ```
+3. Configure the backend
+   ```sh
+   cp backend/src/main/resources/application.properties.example backend/src/main/resources/application.properties
+   # Edit application.properties with your database credentials
+   ```
+4. Run the backend
+   ```sh
+   cd backend
+   ./mvnw spring-boot:run
+   ```
+5. Configure and run the frontend
+   ```sh
+   cd frontend
+   cp .env.example .env
+   npm install
+   npm run start
+   ```
+6. Open your browser and go to `http://localhost:5173/`
 
 ## Features <a name="Features"></a>
 - ✅ Add, update, delete books
