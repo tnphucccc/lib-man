@@ -2,7 +2,9 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.AuthorDTO;
 import com.example.backend.service.authors.IAuthorService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,13 +28,13 @@ public class AuthorController {
     }
 
     @PostMapping({"", "/"})
-    public ResponseEntity<AuthorDTO> createAuthor(@RequestBody AuthorDTO authorDTO) {
+    public ResponseEntity<AuthorDTO> createAuthor(@Valid @RequestBody AuthorDTO authorDTO) {
         AuthorDTO newAuthor = authorService.createAuthor(authorDTO);
-        return ResponseEntity.ok(newAuthor);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newAuthor);
     }
 
     @PutMapping({"/{id}", "/{id}/"})
-    public ResponseEntity<AuthorDTO> updateAuthor(@PathVariable Long id, @RequestBody AuthorDTO authorDTO) {
+    public ResponseEntity<AuthorDTO> updateAuthor(@PathVariable Long id, @Valid @RequestBody AuthorDTO authorDTO) {
         AuthorDTO updatedAuthor = authorService.updateAuthor(id, authorDTO);
         return ResponseEntity.ok(updatedAuthor);
     }

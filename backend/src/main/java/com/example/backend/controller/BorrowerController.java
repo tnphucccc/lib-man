@@ -1,8 +1,11 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.BorrowerDTO;
+import com.example.backend.dto.BorrowerPatchDTO;
 import com.example.backend.service.borrowers.IBorrowerService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,19 +29,19 @@ public class BorrowerController {
     }
 
     @PostMapping({"", "/"})
-    public ResponseEntity<BorrowerDTO> createBorrower(@RequestBody BorrowerDTO.BorrowerSummaryDTO borrowerDTO) {
+    public ResponseEntity<BorrowerDTO> createBorrower(@Valid @RequestBody BorrowerDTO.BorrowerSummaryDTO borrowerDTO) {
         BorrowerDTO newBorrower = borrowerService.createBorrower(borrowerDTO);
-        return ResponseEntity.ok(newBorrower);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newBorrower);
     }
 
     @PatchMapping({"/{id}", "/{id}/"})
-    public ResponseEntity<BorrowerDTO> updateAuthor(@PathVariable Long id, @RequestBody BorrowerDTO borrowerDTO) {
-        BorrowerDTO updatedBorrower = borrowerService.updateBorrower(id, borrowerDTO);
+    public ResponseEntity<BorrowerDTO> updateBorrower(@PathVariable Long id, @Valid @RequestBody BorrowerPatchDTO borrowerPatchDTO) {
+        BorrowerDTO updatedBorrower = borrowerService.updateBorrower(id, borrowerPatchDTO);
         return ResponseEntity.ok(updatedBorrower);
     }
 
     @DeleteMapping({"/{id}", "/{id}/"})
-    public ResponseEntity<Void> deleteAuthor(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteBorrower(@PathVariable Long id) {
         borrowerService.deleteBorrower(id);
         return ResponseEntity.noContent().build();
     }
