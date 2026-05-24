@@ -28,7 +28,7 @@ export default function Header() {
     <div className={`w-full h-full bg-orange-500 flex justify-between items-center py-2 px-16`}>
         <div className='flex justify-center items-center gap-x-5 pl-[20px] hover:cursor-pointer' onClick={()=>handleHome()}>
             <div className="w-16 h-16 rounded-full border-4 border-black bg-white flex justify-center items-center">
-                    <img src="./Assets/hp1.png" className="h-8 w-8" alt="" />   
+                    <img src="/Assets/hp1.png" className="h-8 w-8" alt="" />
             </div>
             
             <div className="text-white text-lg font-bold w-10 ">

@@ -3,7 +3,7 @@ export default function Homepage() {
     <div className="w-full h-full">
       {/* Body1*/}
         <div className='relative h-96 w-full'>
-        <img src="./Assets/hp3.jpg" className='h-96 w-screen object-cover' alt="" />
+        <img src="/Assets/hp3.jpg" className='h-96 w-screen object-cover' alt="" />
         
         <div className='absolute inset-0 p-20 bg-black bg-opacity-60'>
             <p className='text-white text-4xl font-bold'>Library Management System</p>
