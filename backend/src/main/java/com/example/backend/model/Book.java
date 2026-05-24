@@ -3,18 +3,19 @@ package com.example.backend.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "books")
 @Data
+@EqualsAndHashCode(of = "bookId")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Book {
@@ -32,7 +33,7 @@ public class Book {
     @Column(name = "publication_year")
     private Integer publicationYear;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "book_authors",
             joinColumns = @JoinColumn(name = "book_id"),
@@ -47,7 +48,10 @@ public class Book {
     @Column(name = "cover_image_url")
     private String coverImageUrl;
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
     private Set<Borrowing> borrowings = new HashSet<>();
 
     @CreationTimestamp
@@ -62,10 +66,5 @@ public class Book {
         AVAILABLE,
         BORROWED,
         LOST
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(bookId, title);
     }
 }

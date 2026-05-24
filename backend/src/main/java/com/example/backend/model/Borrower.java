@@ -3,18 +3,19 @@ package com.example.backend.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name = "borrowers")
 @Data
+@EqualsAndHashCode(of = "borrowerId")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Borrower {
@@ -29,7 +30,7 @@ public class Borrower {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "phone", unique = true, nullable = false)
+    @Column(name = "phone")
     private String phone;
 
     @Column(name = "address")
@@ -38,6 +39,9 @@ public class Borrower {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private BorrowerStatus status = BorrowerStatus.ACTIVE;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 
     @OneToMany(mappedBy = "borrower")
     private Set<Borrowing> borrowings = new HashSet<>();
@@ -53,10 +57,5 @@ public class Borrower {
     public enum BorrowerStatus {
         ACTIVE,
         SUSPENDED
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(borrowerId, name);
     }
 }
