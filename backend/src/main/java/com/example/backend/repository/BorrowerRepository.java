@@ -21,4 +21,6 @@ public interface BorrowerRepository extends JpaRepository<Borrower, Long> {
 
     @Query("SELECT br FROM Borrowing br WHERE br.borrower.borrowerId = :borrowerId")
     List<Borrowing> findBorrowingByBorrowerId(@Param("borrowerId") Long borrowerId);
+
+    List<Borrower> findByDeletedFalse();
 }

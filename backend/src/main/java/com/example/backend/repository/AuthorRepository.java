@@ -14,4 +14,9 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 
     @Query("SELECT b FROM Author a JOIN a.books b WHERE a.authorId = :authorId")
     List<Book> findBooksByAuthorId(@Param("authorId") Long authorId);
+
+    List<Author> findByDeletedFalse();
+
+    @Query("SELECT b FROM Book b JOIN b.authors a WHERE a.authorId = :authorId AND b.deleted = false")
+    List<Book> findActiveBooksByAuthorId(@Param("authorId") Long authorId);
 }
