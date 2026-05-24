@@ -1,7 +1,7 @@
 -- Create Authors table
 CREATE TABLE authors
 (
-    author_id    INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
+    author_id    BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
     name         VARCHAR(100) NOT NULL,
     nationality  VARCHAR(50),
     portrait_url VARCHAR(255),
@@ -13,7 +13,7 @@ CREATE TABLE authors
 -- Create Books table
 CREATE TABLE books
 (
-    book_id          INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
+    book_id          BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
     title            VARCHAR(200) NOT NULL,
     isbn             VARCHAR(13) UNIQUE,
     publication_year INTEGER,
@@ -27,8 +27,8 @@ CREATE TABLE books
 -- Create the book_authors join table
 CREATE TABLE book_authors
 (
-    book_id   INT NOT NULL,
-    author_id INT NOT NULL,
+    book_id   BIGINT NOT NULL,
+    author_id BIGINT NOT NULL,
     PRIMARY KEY (book_id, author_id),
     FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE RESTRICT,
     FOREIGN KEY (author_id) REFERENCES authors (author_id) ON DELETE RESTRICT
@@ -37,7 +37,7 @@ CREATE TABLE book_authors
 -- Create Borrowers table
 CREATE TABLE borrowers
 (
-    borrower_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
+    borrower_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
     name        VARCHAR(100)        NOT NULL,
     email       VARCHAR(100) UNIQUE NOT NULL,
     phone       VARCHAR(20),
@@ -51,9 +51,9 @@ CREATE TABLE borrowers
 -- Create Borrowings table
 CREATE TABLE borrowings
 (
-    borrowing_id  INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
-    book_id       INTEGER REFERENCES books (book_id) ON DELETE RESTRICT,
-    borrower_id   INTEGER REFERENCES borrowers (borrower_id) ON DELETE RESTRICT,
+    borrowing_id  BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
+    book_id       BIGINT REFERENCES books (book_id) ON DELETE RESTRICT,
+    borrower_id   BIGINT REFERENCES borrowers (borrower_id) ON DELETE RESTRICT,
     borrowed_date DATE                     DEFAULT CURRENT_DATE,
     due_date      DATE NOT NULL,
     returned_date DATE,
