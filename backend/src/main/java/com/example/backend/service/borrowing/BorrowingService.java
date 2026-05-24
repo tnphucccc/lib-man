@@ -9,11 +9,11 @@ import com.example.backend.model.Borrowing;
 import com.example.backend.repository.BookRepository;
 import com.example.backend.repository.BorrowerRepository;
 import com.example.backend.repository.BorrowingRepository;
-import com.example.backend.service.authors.AuthorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 public class BorrowingService implements IBorrowingService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthorService.class);
+    private static final Logger logger = LoggerFactory.getLogger(BorrowingService.class);
 
     @Autowired
     private BorrowingRepository borrowingRepository;
@@ -56,18 +56,25 @@ public class BorrowingService implements IBorrowingService {
     }
 
     @Override
+    @Transactional
     public BorrowingDTO createBorrowing(BorrowingDTO borrowingDTO) {
         logger.info("Creating a new borrowing");
-        Borrowing borrowing = new Borrowing();
-        borrowing.setBorrowedDate(LocalDate.now());
-        borrowing.setDueDate(borrowingDTO.getDueDate());
-        borrowing.setStatus(Borrowing.BorrowingStatus.valueOf("BORROWED"));
 
         Book book = bookRepository.findById(borrowingDTO.getBookId())
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + borrowingDTO.getBookId()));
 
+        if (book.getStatus() != Book.BookStatus.AVAILABLE) {
+            throw new IllegalStateException(
+                    "Book is not available for borrowing (current status: " + book.getStatus() + ")");
+        }
+
         Borrower borrower = borrowerRepository.findById(borrowingDTO.getBorrowerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Borrower not found with id: " + borrowingDTO.getBorrowerId()));
+
+        Borrowing borrowing = new Borrowing();
+        borrowing.setBorrowedDate(LocalDate.now());
+        borrowing.setDueDate(borrowingDTO.getDueDate());
+        borrowing.setStatus(Borrowing.BorrowingStatus.BORROWED);
         borrowing.setBorrower(borrower);
         borrowing.setBook(book);
 
@@ -81,6 +88,7 @@ public class BorrowingService implements IBorrowingService {
     }
 
     @Override
+    @Transactional
     public BorrowingDTO updateBorrowing(Long borrowingId, BorrowingDTO borrowingDTO) {
         logger.info("Updating borrowing with id: {}", borrowingId);
         Borrowing existingBorrowing = borrowingRepository.findById(borrowingId)
@@ -122,6 +130,7 @@ public class BorrowingService implements IBorrowingService {
     }
 
     @Override
+    @Transactional
     public void deleteBorrowing(Long borrowingId) {
         logger.info("Deleting borrowing with id: {}", borrowingId);
         Borrowing borrowing = borrowingRepository.findById(borrowingId)

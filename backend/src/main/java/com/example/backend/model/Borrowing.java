@@ -3,16 +3,17 @@ package com.example.backend.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Entity
 @Table(name = "borrowings")
 @Data
+@EqualsAndHashCode(of = "borrowingId")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Borrowing {
@@ -54,10 +55,5 @@ public class Borrowing {
         BORROWED,
         RETURNED,
         OVERDUE
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(borrowingId);
     }
 }
