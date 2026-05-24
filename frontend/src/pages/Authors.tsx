@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../services/api";
 import { useEffect, useState } from "react";
 import Modal from "../components/Modal";
 import AuthorCard from "../components/AuthorCard";
@@ -37,7 +37,7 @@ export default function Authors() {
 
   const handleGetAuthors = async () => {
     try {
-      const res = await axios.get(import.meta.env.VITE_BASE_URL + "/authors");
+      const res = await api.get("/authors");
       if (res.status === 200) {
         setAuthorList(res.data);
         console.log(res.data);
@@ -79,7 +79,7 @@ export default function Authors() {
     portraitUrl: string;
   }) => {
     try {
-      const res = await axios.post(import.meta.env.VITE_BASE_URL + "/authors", {
+      const res = await api.post("/authors", {
         name,
         nationality,
         portraitUrl,
@@ -88,11 +88,11 @@ export default function Authors() {
       if (res) {
         console.log(res.data);
         handleGetAuthors();
+        handleCloseModalCreate();
       }
     } catch (error) {
       console.error(error);
     }
-    handleCloseModalCreate();
   };
 
   const handleSubmitUpdate = async ({
@@ -110,24 +110,24 @@ export default function Authors() {
       books,
     };
     try {
-      const res = await axios.put(
-        import.meta.env.VITE_BASE_URL + "/authors/" + currentAuthor?.authorId,
+      const res = await api.put(
+        "/authors/" + currentAuthor?.authorId,
         updatedAuthor
       );
 
       if (res) {
         console.log(res.data);
         handleGetAuthors();
+        handleCloseModalUpdate();
       }
     } catch (error) {
       console.error(error);
     }
-    handleCloseModalUpdate();
   };
 
   const handleDelete = async (id: number) => {
     try {
-      const res = await axios.delete(import.meta.env.VITE_BASE_URL + "/authors/" + id);
+      const res = await api.delete("/authors/" + id);
       if (res) {
         console.log(res.data);
         handleGetAuthors();

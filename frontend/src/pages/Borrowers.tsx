@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../services/api";
 import { useEffect, useState } from "react";
 import Modal from "../components/Modal";
 import UpdateBorrowerModal from "../components/UpdateBorrowerModal";
@@ -37,7 +37,7 @@ export default function Borrowers() {
 
   const handleOpenModalDetail = async (borrower: any) => {
     try {
-      const res = await axios.get(import.meta.env.VITE_BASE_URL + '/borrowers/' + borrower.id);
+      const res = await api.get('/borrowers/' + borrower.id);
       if (res) {
           console.log(res.data);
           setCurrentBorrower(res.data);
@@ -75,7 +75,7 @@ const handleCloseModalCreate = () => {
 const handleDelete = async (borrower: any) => {
   setCurrentBorrower(borrower);
   try {
-      const res = await axios.delete(import.meta.env.VITE_BASE_URL + '/borrowers/' + borrower.id);
+      const res = await api.delete('/borrowers/' + borrower.id);
       if (res) {
           console.log(res.data);
           handleGetBorrowers();
@@ -88,7 +88,7 @@ const handleDelete = async (borrower: any) => {
 const handleSubmitCreate = async ({name,email,phone,address} : {name: string, email:string, phone: string, address: string}) => {
 
   try {
-      const res = await axios.post (import.meta.env.VITE_BASE_URL + '/borrowers', {
+      const res = await api.post ('/borrowers', {
           name: name,
           email: email,
           phone: phone,
@@ -98,16 +98,16 @@ const handleSubmitCreate = async ({name,email,phone,address} : {name: string, em
       if (res) {
           console.log(res.data);
           handleGetBorrowers();
+          handleCloseModalCreate();
       }
   } catch (error) {
       console.error(error);
   }
-  handleCloseModalCreate();
 };
 
 const handleSubmitUpdate = async ({name,email,phone,address} : { name: string,email : String, phone: string,address: string}) => {
   try {
-      const res = await axios.patch (import.meta.env.VITE_BASE_URL + '/borrowers/' + currentBorrower!.id, {
+      const res = await api.patch ('/borrowers/' + currentBorrower!.id, {
           name: name,
           email:email,
           phone: phone,
@@ -116,16 +116,16 @@ const handleSubmitUpdate = async ({name,email,phone,address} : { name: string,em
       if (res) {
         console.log(res.data);
         handleGetBorrowers();
+        handleCloseModalUpdate();
       }
     } catch (error) {
       console.error(error);
     }
-      handleCloseModalUpdate();
 };
 
 const handleGetBorrowers = async () => {
   try {
-    const res = await axios.get(import.meta.env.VITE_BASE_URL + '/borrowers');
+    const res = await api.get('/borrowers');
     if (res.status) {
       setBorrowerList(res.data);
       console.log(res.data);
@@ -143,7 +143,7 @@ const searchList = borrowerList.filter((borrower) => {
 
 const handleGetBooks = async () => {  
   try {
-      const res = await axios.get (import.meta.env.VITE_BASE_URL + '/books');
+      const res = await api.get ('/books');
       if (res.status === 200) {
           setBookList(res.data);
           console.log(res.data);
@@ -191,7 +191,7 @@ useEffect(() => {
               </thead>
               <tbody>
                 {searchList.map((borrower) => (
-                  <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-base">
+                  <tr key={borrower.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-base">
                       <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                           {borrower.id}
                       </th>

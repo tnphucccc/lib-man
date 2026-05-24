@@ -1,16 +1,19 @@
 import CounterReducer from "./reducers/CounterReducers";
+import toastReducer from "./toastSlice";
 import { thunk } from "redux-thunk";
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 const persistConfig = {
-  key: 'root', // Key for storage
+  key: 'root',
   storage,
+  blacklist: ['toasts'],
 }
 
 const rootReducer = combineReducers({
   CounterStore: CounterReducer,
+  toasts: toastReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

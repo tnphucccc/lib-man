@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../services/api";
 import { useEffect, useState } from "react";
 import Modal from "../components/Modal";    
 import BookCard from "../components/BookCard";
@@ -35,7 +35,7 @@ export default function Books() {
 
     const handleGetBooks = async () => {  
         try {
-            const res = await axios.get (import.meta.env.VITE_BASE_URL + '/books');
+            const res = await api.get ('/books');
             if (res.status === 200) {
                 setBookList(res.data);
                 console.log(res.data);
@@ -79,7 +79,7 @@ export default function Books() {
 
     const handleSubmitBorrow = async ({id,date}:{id:number, date:Date}) => {
         try {
-            const res = await axios.post(import.meta.env.VITE_BASE_URL + '/borrowings', {
+            const res = await api.post('/borrowings', {
                 bookId: currentBookId,
                 borrowerId: id,
                 dueDate: date
@@ -87,17 +87,17 @@ export default function Books() {
             if (res) {
                 console.log(res.data);
                 handleGetBooks();
+                handleCloseModalBorrow();
             }
         } catch (error) {
             console.error(error);
         }
-        handleCloseModalBorrow();
     }
     
     const handleSubmitCreate = async ({title, isbn, publicationYear, author,coverImageUrl} : {title: string, isbn: string, publicationYear: string, author: any, coverImageUrl: string}) => {
 
         try {
-            const res = await axios.post (import.meta.env.VITE_BASE_URL + '/books', {
+            const res = await api.post ('/books', {
                 bookId: 0,
                 title: title,
                 isbn: isbn,
@@ -115,16 +115,16 @@ export default function Books() {
             if (res) {
                 console.log(res.data);
                 handleGetBooks();
+                handleCloseModalCreate();
             }
         } catch (error) {
             console.error(error);
         }
-        handleCloseModalCreate();
     };
 
     const handleSubmitUpdate = async ({title, isbn, publicationYear, authors, coverImageUrl} : { title: string, isbn: string, publicationYear: string, authors: Author, coverImageUrl: string}) => {
         try {
-            const res = await axios.put (import.meta.env.VITE_BASE_URL + '/books/' + currentBook!.bookId, {
+            const res = await api.put ('/books/' + currentBook!.bookId, {
                 bookId: currentBook!.bookId,
                 title: title,
                 isbn: isbn,
@@ -138,21 +138,21 @@ export default function Books() {
                     }
                 ],
                 status: currentBook!.status,
-                coverImage: coverImageUrl
+                coverImageUrl: coverImageUrl
             })
             if (res) {
                 console.log(res.data);
                 handleGetBooks();
+                handleCloseModalUpdate();
             }
         } catch (error) {
             console.error(error);
         }
-        handleCloseModalUpdate();
     };
 
     const handleDelete = async (id: number) => {
         try {
-            const res = await axios.delete(import.meta.env.VITE_BASE_URL + '/books/' + id);
+            const res = await api.delete('/books/' + id);
             if (res) {
                 console.log(res.data);
                 handleGetBooks();
@@ -176,7 +176,7 @@ export default function Books() {
             </div>
             <div className="flex flex-row flex-wrap w-full h-fit gap-6 mt-4 justify-center">
                 {searchList.map((book: any) => (
-                <BookCard book={book} handleOpenModalBorrow={handleOpenModalBorrow} handleDelete={handleDelete}  handleOpenModalUpdate={handleOpenModalUpdate}/>
+                <BookCard key={book.bookId} book={book} handleOpenModalBorrow={handleOpenModalBorrow} handleDelete={handleDelete}  handleOpenModalUpdate={handleOpenModalUpdate}/>
             ))}
             </div>
             {/* {Modal for borrowing book} */}

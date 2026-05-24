@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Book } from "./Books";
-import axios from "axios";
+import api from "../services/api";
 import Modal from "../components/Modal";
 import ReturnBookModal from "../components/ReturnBookModal";
 import SearchBar from "../components/SearchBar";
@@ -25,7 +25,7 @@ export default function Record() {
 
   const handleGetBooks = async () => {
     try {
-            const res = await axios.get (import.meta.env.VITE_BASE_URL + '/books');
+            const res = await api.get ('/books');
             if (res.status) {
                 setBookList(res.data);
                 console.log(res.data);
@@ -37,7 +37,7 @@ export default function Record() {
 
   const handleGetRecords = async () => {
     try {
-      const res = await axios.get(import.meta.env.VITE_BASE_URL + '/borrowings');
+      const res = await api.get('/borrowings');
       if (res.status) {
         setRecordList(res.data);
         console.log(res.data);
@@ -67,15 +67,15 @@ export default function Record() {
     console.log(updatedRecord);
     
     try {
-      const res = await axios.put(import.meta.env.VITE_BASE_URL + '/borrowings/' + currentRecord?.borrowingId, updatedRecord);
+      const res = await api.put('/borrowings/' + currentRecord?.borrowingId, updatedRecord);
       if (res.status) {
         console.log(res.data);
         handleGetRecords();
+        handleCloseModalReturn();
       }
     } catch (error) {
       console.log(error);
     }
-    handleCloseModalReturn();
   };
 
 
@@ -118,7 +118,7 @@ export default function Record() {
               </thead>
               <tbody>
                 {searchList.map((record) => (
-                  <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-base">
+                  <tr key={record.borrowingId} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 text-base">
                       <th className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                           {bookList.find(book => book.bookId === record.bookId)?.title}
                       </th>

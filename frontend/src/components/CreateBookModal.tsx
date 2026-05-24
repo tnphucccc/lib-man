@@ -1,7 +1,7 @@
 import { IoMdClose } from "react-icons/io";
 
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
+import api from "../services/api";
 import { Author } from "../pages/Authors";
 
 
@@ -22,7 +22,7 @@ export default function CreateBookModal({ handleCloseModal, handleSubmit}: Creat
 
     const handleGetAuthors = async () => {
         try {
-            const res = await axios.get (import.meta.env.VITE_BASE_URL + '/authors'); 
+            const res = await api.get ('/authors'); 
             if (res){
                 setAuthorList(res.data);
                 console.log(res.data);
