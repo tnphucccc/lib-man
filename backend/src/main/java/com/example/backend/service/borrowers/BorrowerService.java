@@ -1,22 +1,19 @@
 package com.example.backend.service.borrowers;
 
 import com.example.backend.dto.BorrowerDTO;
-import com.example.backend.dto.BorrowingDTO;
+import com.example.backend.dto.BorrowerPatchDTO;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.mapper.LibraryMapper;
 import com.example.backend.model.Borrower;
 import com.example.backend.model.Borrowing;
 import com.example.backend.repository.BorrowerRepository;
-import com.example.backend.repository.BorrowingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,20 +24,19 @@ public class BorrowerService implements IBorrowerService {
     private BorrowerRepository borrowerRepository;
 
     @Autowired
-    private BorrowingRepository borrowingRepository;
-
-    @Autowired
     private LibraryMapper libraryMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<BorrowerDTO.BorrowerSummaryDTO> getAllBorrowers() {
         logger.info("Fetching all borrowers from the database");
-        return borrowerRepository.findAll().stream()
-                .map(libraryMapper::toBorrowerSummaryDTO).
-                collect(Collectors.toList());
+        return borrowerRepository.findByDeletedFalse().stream()
+                .map(libraryMapper::toBorrowerSummaryDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BorrowerDTO getBorrowerById(Long borrowerID) {
         logger.info("Fetching borrower with id: {}", borrowerID);
 
@@ -57,6 +53,7 @@ public class BorrowerService implements IBorrowerService {
     }
 
     @Override
+    @Transactional
     public BorrowerDTO createBorrower(BorrowerDTO.BorrowerSummaryDTO borrowerDTO) {
         logger.info("Creating a new borrower");
         Borrower borrower = new Borrower();
@@ -70,65 +67,30 @@ public class BorrowerService implements IBorrowerService {
         return libraryMapper.toBorrowerDTO(savedBorrower);
     }
 
-    private Set<Borrowing> getPersistedBorrowings(Set<BorrowingDTO> borrowingDTOs) {
-        Set<Borrowing> persistedBorrowings = new HashSet<>();
-
-        for (BorrowingDTO borrowingDTO : borrowingDTOs) {
-            Optional<Borrowing> existingBorrowing = borrowingRepository.findById(borrowingDTO.getBorrowingId());
-
-            if (existingBorrowing.isPresent()) {
-                persistedBorrowings.add(existingBorrowing.get());
-            } else {
-                Borrowing newBorrowing = new Borrowing();
-                newBorrowing.getBook().setBookId(borrowingDTO.getBookId());
-                newBorrowing.setStatus(Borrowing.BorrowingStatus.valueOf(borrowingDTO.getStatus()));
-                newBorrowing.setBorrowedDate(borrowingDTO.getBorrowedDate());
-                newBorrowing.setDueDate(borrowingDTO.getDueDate());
-                newBorrowing.setUpdatedAt(borrowingDTO.getUpdatedAt());
-                newBorrowing.setCreatedAt(borrowingDTO.getCreatedAt());
-                persistedBorrowings.add(borrowingRepository.save(newBorrowing));
-            }
-        }
-        return persistedBorrowings;
-    }
-
-
     @Override
-    public BorrowerDTO updateBorrower(Long borrowerID, BorrowerDTO borrowerDTO) {
+    @Transactional
+    public BorrowerDTO updateBorrower(Long borrowerID, BorrowerPatchDTO patch) {
         logger.info("Updating borrower with id: {}", borrowerID);
         Borrower existingBorrower = borrowerRepository.findById(borrowerID)
                 .orElseThrow(() -> new ResourceNotFoundException("Borrower not found with id: " + borrowerID));
-
-        if (borrowerDTO.getName() != null) {
-            existingBorrower.setName(borrowerDTO.getName());
+        if (existingBorrower.isDeleted()) {
+            throw new IllegalStateException("Cannot update a deleted borrower");
         }
 
-        if (borrowerDTO.getPhone() != null) {
-            existingBorrower.setPhone(borrowerDTO.getPhone());
+        if (patch.getName() != null) {
+            existingBorrower.setName(patch.getName());
         }
-
-        if (borrowerDTO.getAddress() != null) {
-            existingBorrower.setAddress(borrowerDTO.getAddress());
+        if (patch.getEmail() != null) {
+            existingBorrower.setEmail(patch.getEmail());
         }
-
-        if (borrowerDTO.getEmail() != null) {
-            existingBorrower.setEmail(borrowerDTO.getEmail());
+        if (patch.getPhone() != null) {
+            existingBorrower.setPhone(patch.getPhone());
         }
-
-        if (borrowerDTO.getStatus() != null) {
-            existingBorrower.setStatus(Borrower.BorrowerStatus.valueOf(borrowerDTO.getStatus()));
+        if (patch.getAddress() != null) {
+            existingBorrower.setAddress(patch.getAddress());
         }
-
-        if (borrowerDTO.getBorrowings() != null && !borrowerDTO.getBorrowings().isEmpty()) {
-            Set<Borrowing> borrowings = getPersistedBorrowings(borrowerDTO.getBorrowings());
-            existingBorrower.setBorrowings(borrowings);
-        }
-
-        if (borrowerDTO.getCreatedAt() != null) {
-            existingBorrower.setCreatedAt(borrowerDTO.getCreatedAt());
-        }
-        if (borrowerDTO.getUpdatedAt() != null) {
-            existingBorrower.setUpdatedAt(borrowerDTO.getUpdatedAt());
+        if (patch.getStatus() != null) {
+            existingBorrower.setStatus(Borrower.BorrowerStatus.valueOf(patch.getStatus()));
         }
 
         Borrower updatedBorrower = borrowerRepository.save(existingBorrower);
@@ -137,11 +99,13 @@ public class BorrowerService implements IBorrowerService {
     }
 
     @Override
+    @Transactional
     public void deleteBorrower(Long borrowerID) {
-        logger.info("Deleting borrower with id: {}", borrowerID);
+        logger.info("Soft-deleting borrower with id: {}", borrowerID);
         Borrower borrower = borrowerRepository.findById(borrowerID)
                 .orElseThrow(() -> new ResourceNotFoundException("Borrower not found with id: " + borrowerID));
-        borrowerRepository.delete(borrower);
-        logger.info("Borrower deleted successfully with id: {}", borrowerID);
+        borrower.setDeleted(true);
+        borrowerRepository.save(borrower);
+        logger.info("Borrower soft-deleted successfully with id: {}", borrowerID);
     }
 }
