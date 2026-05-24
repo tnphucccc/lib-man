@@ -5,6 +5,7 @@ CREATE TABLE authors
     name         VARCHAR(100) NOT NULL,
     nationality  VARCHAR(50),
     portrait_url VARCHAR(255),
+    deleted      BOOLEAN NOT NULL         DEFAULT FALSE,
     created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -16,8 +17,9 @@ CREATE TABLE books
     title            VARCHAR(200) NOT NULL,
     isbn             VARCHAR(13) UNIQUE,
     publication_year INTEGER,
-    status           VARCHAR(20)              DEFAULT 'AVAILABLE' CHECK (status IN ('AVAILABLE', 'BORROWED')),
+    status           VARCHAR(20)              DEFAULT 'AVAILABLE' CHECK (status IN ('AVAILABLE', 'BORROWED', 'LOST')),
     cover_image_url  VARCHAR(255),
+    deleted          BOOLEAN NOT NULL         DEFAULT FALSE,
     created_at       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -28,8 +30,8 @@ CREATE TABLE book_authors
     book_id   INT NOT NULL,
     author_id INT NOT NULL,
     PRIMARY KEY (book_id, author_id),
-    FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE CASCADE,
-    FOREIGN KEY (author_id) REFERENCES authors (author_id) ON DELETE CASCADE
+    FOREIGN KEY (book_id) REFERENCES books (book_id) ON DELETE RESTRICT,
+    FOREIGN KEY (author_id) REFERENCES authors (author_id) ON DELETE RESTRICT
 );
 
 -- Create Borrowers table
@@ -41,6 +43,7 @@ CREATE TABLE borrowers
     phone       VARCHAR(20),
     address     TEXT,
     status      VARCHAR(20)              DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'SUSPENDED')),
+    deleted     BOOLEAN NOT NULL         DEFAULT FALSE,
     created_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -49,8 +52,8 @@ CREATE TABLE borrowers
 CREATE TABLE borrowings
 (
     borrowing_id  INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
-    book_id       INTEGER REFERENCES books (book_id),
-    borrower_id   INTEGER REFERENCES borrowers (borrower_id),
+    book_id       INTEGER REFERENCES books (book_id) ON DELETE RESTRICT,
+    borrower_id   INTEGER REFERENCES borrowers (borrower_id) ON DELETE RESTRICT,
     borrowed_date DATE                     DEFAULT CURRENT_DATE,
     due_date      DATE NOT NULL,
     returned_date DATE,
