@@ -1,0 +1,33 @@
+spring.application.name=backend
+
+# --- Database (PostgreSQL) ---
+spring.datasource.url=jdbc:postgresql://localhost:5432/libman
+spring.datasource.username=postgres
+spring.datasource.password=changeme
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# --- JPA / Hibernate ---
+# Use 'validate' once the schema is created via schema.sql.
+# Use 'none' to skip schema management entirely.
+# Use 'update' for local dev only (do not use in production).
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=false
+spring.jpa.open-in-view=false
+
+# --- Schema bootstrap ---
+# 'always' runs schema.sql/data.sql on startup (useful for first-time setup
+# against an empty database). Set to 'never' once the schema is in place.
+spring.sql.init.mode=never
+
+# --- Server ---
+server.port=8080
+
+# --- CORS ---
+# Comma-separated list of allowed front-end origins.
+app.cors.allowed-origins=http://localhost:5173
+
+# --- Security (single librarian user, HTTP Basic) ---
+# Override these for your environment. If unset, Spring Boot logs a random
+# password to the console on every restart.
+spring.security.user.name=librarian
+spring.security.user.password=CHANGE_ME
