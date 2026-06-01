@@ -22,6 +22,11 @@ spring.sql.init.mode=never
 # --- Server ---
 server.port=8080
 
+# --- Concurrency ---
+# Virtual threads (JDK 21+, recommended on JDK 25) for the web server and
+# async executors. Frees platform threads on blocking JPA/JDBC calls.
+spring.threads.virtual.enabled=true
+
 # --- CORS ---
 # Comma-separated list of allowed front-end origins.
 app.cors.allowed-origins=http://localhost:5173

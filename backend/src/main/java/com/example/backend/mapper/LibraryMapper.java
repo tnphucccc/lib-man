@@ -10,26 +10,25 @@ import com.example.backend.model.Borrower;
 import com.example.backend.model.Borrowing;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 public class LibraryMapper {
     public BookDTO toBookDTO(Book book) {
-        BookDTO bookDTO = new BookDTO();
-        bookDTO.setBookId(book.getBookId());
-        bookDTO.setTitle(book.getTitle());
-        bookDTO.setIsbn(book.getIsbn());
-        bookDTO.setPublicationYear(book.getPublicationYear());
-
-        if (book.getAuthors() != null) {
-            bookDTO.setAuthors(book.getAuthors().stream()
-                    .map(this::toAuthorSummaryDTO)
-                    .collect(Collectors.toSet()));
-        }
-
-        bookDTO.setStatus(book.getStatus().name());
-        bookDTO.setCoverImageUrl(book.getCoverImageUrl());
-        return bookDTO;
+        Set<AuthorDTO.AuthorSummaryDTO> authors = book.getAuthors() == null ? null :
+                book.getAuthors().stream()
+                        .map(this::toAuthorSummaryDTO)
+                        .collect(Collectors.toSet());
+        return new BookDTO(
+                book.getBookId(),
+                book.getTitle(),
+                book.getIsbn(),
+                book.getPublicationYear(),
+                authors,
+                book.getStatus().name(),
+                book.getCoverImageUrl()
+        );
     }
 
     public BookDTO.BookSummaryDTO toBookSummaryDTO(Book book) {
@@ -42,19 +41,17 @@ public class LibraryMapper {
     }
 
     public AuthorDTO toAuthorDTO(Author author) {
-        AuthorDTO authorDTO = new AuthorDTO();
-        authorDTO.setAuthorId(author.getAuthorId());
-        authorDTO.setName(author.getName());
-        authorDTO.setNationality(author.getNationality());
-        authorDTO.setPortraitUrl(author.getPortraitUrl());
-
-        if (author.getBooks() != null) {
-            authorDTO.setBooks(author.getBooks().stream()
-                    .map(this::toBookSummaryDTO)
-                    .collect(Collectors.toSet()));
-        }
-
-        return authorDTO;
+        Set<BookDTO.BookSummaryDTO> books = author.getBooks() == null ? null :
+                author.getBooks().stream()
+                        .map(this::toBookSummaryDTO)
+                        .collect(Collectors.toSet());
+        return new AuthorDTO(
+                author.getAuthorId(),
+                author.getName(),
+                author.getNationality(),
+                author.getPortraitUrl(),
+                books
+        );
     }
 
     public AuthorDTO.AuthorSummaryDTO toAuthorSummaryDTO(Author author) {
@@ -68,42 +65,46 @@ public class LibraryMapper {
 
     public Author toAuthorEntity(AuthorDTO authorDTO) {
         Author author = new Author();
-        author.setName(authorDTO.getName());
-        author.setNationality(authorDTO.getNationality());
-        author.setPortraitUrl(authorDTO.getPortraitUrl());
+        author.setName(authorDTO.name());
+        author.setNationality(authorDTO.nationality());
+        author.setPortraitUrl(authorDTO.portraitUrl());
         return author;
     }
 
     public BorrowingDTO toBorrowingDTO(Borrowing borrowing) {
-        BorrowingDTO borrowingDTO = new BorrowingDTO();
-        borrowingDTO.setBorrowingId(borrowing.getBorrowingId());
-        borrowingDTO.setBookId(borrowing.getBook().getBookId());
-        borrowingDTO.setBorrowerId(borrowing.getBorrower().getBorrowerId());
-        borrowingDTO.setBorrowedDate(borrowing.getBorrowedDate());
-        borrowingDTO.setDueDate(borrowing.getDueDate());
-        borrowingDTO.setReturnedDate(borrowing.getReturnedDate());
-        borrowingDTO.setStatus(borrowing.getStatus().name());
-        return borrowingDTO;
+        return new BorrowingDTO(
+                borrowing.getBorrowingId(),
+                borrowing.getBook().getBookId(),
+                borrowing.getBorrower().getBorrowerId(),
+                borrowing.getBorrowedDate(),
+                borrowing.getDueDate(),
+                borrowing.getReturnedDate(),
+                borrowing.getCreatedAt(),
+                borrowing.getUpdatedAt(),
+                borrowing.getStatus().name()
+        );
     }
 
-
     public BorrowerDTO toBorrowerDTO(Borrower borrower) {
-        BorrowerDTO borrowerDTO = new BorrowerDTO();
-        borrowerDTO.setBorrowerId(borrower.getBorrowerId());
-        borrowerDTO.setName(borrower.getName());
-        borrowerDTO.setEmail(borrower.getEmail());
-        borrowerDTO.setPhone(borrower.getPhone());
-        borrowerDTO.setAddress(borrower.getAddress());
-        borrowerDTO.setStatus(borrower.getStatus().name());
-        return borrowerDTO;
+        return new BorrowerDTO(
+                borrower.getBorrowerId(),
+                borrower.getName(),
+                borrower.getEmail(),
+                borrower.getPhone(),
+                borrower.getAddress(),
+                borrower.getStatus().name(),
+                null,
+                borrower.getCreatedAt(),
+                borrower.getUpdatedAt()
+        );
     }
 
     public Borrower toBorrowerEntity(BorrowerDTO borrowerDTO) {
         Borrower borrower = new Borrower();
-        borrower.setName(borrowerDTO.getName());
-        borrower.setEmail(borrowerDTO.getEmail());
-        borrower.setPhone(borrowerDTO.getPhone());
-        borrower.setAddress(borrowerDTO.getAddress());
+        borrower.setName(borrowerDTO.name());
+        borrower.setEmail(borrowerDTO.email());
+        borrower.setPhone(borrowerDTO.phone());
+        borrower.setAddress(borrowerDTO.address());
         return borrower;
     }
 

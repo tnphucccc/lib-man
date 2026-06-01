@@ -3,7 +3,7 @@ package com.example.backend.controller;
 import com.example.backend.dto.BookDTO;
 import com.example.backend.service.books.IBookService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +12,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/books")
+@RequiredArgsConstructor
 public class BookController {
-    @Autowired
-    private IBookService bookService;
+    private final IBookService bookService;
 
     @GetMapping({"", "/"})
     public List<BookDTO> getAllBooks() {

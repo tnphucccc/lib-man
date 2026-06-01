@@ -4,7 +4,7 @@ import com.example.backend.dto.BorrowerDTO;
 import com.example.backend.dto.BorrowerPatchDTO;
 import com.example.backend.service.borrowers.IBorrowerService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +13,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/borrowers")
+@RequiredArgsConstructor
 public class BorrowerController {
-    @Autowired
-    private IBorrowerService borrowerService;
+    private final IBorrowerService borrowerService;
 
     @GetMapping({"", "/"})
     public List<BorrowerDTO.BorrowerSummaryDTO> getAllBorrowers() {

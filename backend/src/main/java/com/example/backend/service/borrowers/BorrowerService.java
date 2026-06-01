@@ -7,9 +7,9 @@ import com.example.backend.mapper.LibraryMapper;
 import com.example.backend.model.Borrower;
 import com.example.backend.model.Borrowing;
 import com.example.backend.repository.BorrowerRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,14 +17,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BorrowerService implements IBorrowerService {
     private static final Logger logger = LoggerFactory.getLogger(BorrowerService.class);
 
-    @Autowired
-    private BorrowerRepository borrowerRepository;
+    private final BorrowerRepository borrowerRepository;
 
-    @Autowired
-    private LibraryMapper libraryMapper;
+    private final LibraryMapper libraryMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -42,14 +41,12 @@ public class BorrowerService implements IBorrowerService {
 
         Borrower borrower = borrowerRepository.findById(borrowerID)
                 .orElseThrow(() -> new ResourceNotFoundException("Borrower not found with id: " + borrowerID));
-        BorrowerDTO borrowerDTO = libraryMapper.toBorrowerDTO(borrower);
 
         List<Borrowing> borrowings = borrowerRepository.findBorrowingByBorrowerId(borrower.getBorrowerId());
-        borrowerDTO.setBorrowings(borrowings.stream()
-                .map(libraryMapper::toBorrowingDTO)
-                .collect(Collectors.toSet()));
-
-        return borrowerDTO;
+        return libraryMapper.toBorrowerDTO(borrower)
+                .withBorrowings(borrowings.stream()
+                        .map(libraryMapper::toBorrowingDTO)
+                        .collect(Collectors.toSet()));
     }
 
     @Override
@@ -57,10 +54,10 @@ public class BorrowerService implements IBorrowerService {
     public BorrowerDTO createBorrower(BorrowerDTO.BorrowerSummaryDTO borrowerDTO) {
         logger.info("Creating a new borrower");
         Borrower borrower = new Borrower();
-        borrower.setPhone(borrowerDTO.getPhone());
-        borrower.setName(borrowerDTO.getName());
-        borrower.setAddress(borrowerDTO.getAddress());
-        borrower.setEmail(borrowerDTO.getEmail());
+        borrower.setPhone(borrowerDTO.phone());
+        borrower.setName(borrowerDTO.name());
+        borrower.setAddress(borrowerDTO.address());
+        borrower.setEmail(borrowerDTO.email());
 
         Borrower savedBorrower = borrowerRepository.save(borrower);
         logger.info("Borrower created successfully with id: {}", savedBorrower.getBorrowerId());
@@ -77,20 +74,20 @@ public class BorrowerService implements IBorrowerService {
             throw new IllegalStateException("Cannot update a deleted borrower");
         }
 
-        if (patch.getName() != null) {
-            existingBorrower.setName(patch.getName());
+        if (patch.name() != null) {
+            existingBorrower.setName(patch.name());
         }
-        if (patch.getEmail() != null) {
-            existingBorrower.setEmail(patch.getEmail());
+        if (patch.email() != null) {
+            existingBorrower.setEmail(patch.email());
         }
-        if (patch.getPhone() != null) {
-            existingBorrower.setPhone(patch.getPhone());
+        if (patch.phone() != null) {
+            existingBorrower.setPhone(patch.phone());
         }
-        if (patch.getAddress() != null) {
-            existingBorrower.setAddress(patch.getAddress());
+        if (patch.address() != null) {
+            existingBorrower.setAddress(patch.address());
         }
-        if (patch.getStatus() != null) {
-            existingBorrower.setStatus(Borrower.BorrowerStatus.valueOf(patch.getStatus()));
+        if (patch.status() != null) {
+            existingBorrower.setStatus(Borrower.BorrowerStatus.valueOf(patch.status()));
         }
 
         Borrower updatedBorrower = borrowerRepository.save(existingBorrower);

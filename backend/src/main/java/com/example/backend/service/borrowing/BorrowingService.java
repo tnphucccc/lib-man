@@ -9,9 +9,9 @@ import com.example.backend.model.Borrowing;
 import com.example.backend.repository.BookRepository;
 import com.example.backend.repository.BorrowerRepository;
 import com.example.backend.repository.BorrowingRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,23 +20,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BorrowingService implements IBorrowingService {
 
     private static final Logger logger = LoggerFactory.getLogger(BorrowingService.class);
 
-    @Autowired
-    private BorrowingRepository borrowingRepository;
+    private final BorrowingRepository borrowingRepository;
 
-    @Autowired
-    private BookRepository bookRepository;
+    private final BookRepository bookRepository;
 
-    @Autowired
-    private BorrowerRepository borrowerRepository;
+    private final BorrowerRepository borrowerRepository;
 
-    @Autowired
-    private LibraryMapper libraryMapper;
+    private final LibraryMapper libraryMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<BorrowingDTO> getAllBorrowings() {
         logger.info("Fetching all borrowings from the database");
         List<Borrowing> borrowings = borrowingRepository.findAll();
@@ -47,6 +45,7 @@ public class BorrowingService implements IBorrowingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BorrowingDTO getBorrowingById(Long borrowingId) {
         logger.info("Fetching borrowing with id: {}", borrowingId);
         Borrowing borrowing = borrowingRepository.findById(borrowingId)
@@ -60,20 +59,20 @@ public class BorrowingService implements IBorrowingService {
     public BorrowingDTO createBorrowing(BorrowingDTO borrowingDTO) {
         logger.info("Creating a new borrowing");
 
-        Book book = bookRepository.findById(borrowingDTO.getBookId())
-                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + borrowingDTO.getBookId()));
+        Book book = bookRepository.findById(borrowingDTO.bookId())
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + borrowingDTO.bookId()));
 
         if (book.getStatus() != Book.BookStatus.AVAILABLE) {
             throw new IllegalStateException(
                     "Book is not available for borrowing (current status: " + book.getStatus() + ")");
         }
 
-        Borrower borrower = borrowerRepository.findById(borrowingDTO.getBorrowerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Borrower not found with id: " + borrowingDTO.getBorrowerId()));
+        Borrower borrower = borrowerRepository.findById(borrowingDTO.borrowerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Borrower not found with id: " + borrowingDTO.borrowerId()));
 
         Borrowing borrowing = new Borrowing();
         borrowing.setBorrowedDate(LocalDate.now());
-        borrowing.setDueDate(borrowingDTO.getDueDate());
+        borrowing.setDueDate(borrowingDTO.dueDate());
         borrowing.setStatus(Borrowing.BorrowingStatus.BORROWED);
         borrowing.setBorrower(borrower);
         borrowing.setBook(book);
@@ -94,29 +93,29 @@ public class BorrowingService implements IBorrowingService {
         Borrowing existingBorrowing = borrowingRepository.findById(borrowingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Borrowing not found with id: " + borrowingId));
 
-        if (borrowingDTO.getBorrowerId() != null) {
-            Borrower borrower = borrowerRepository.findById(borrowingDTO.getBorrowerId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Borrower not found with id: " + borrowingDTO.getBorrowerId()));
+        if (borrowingDTO.borrowerId() != null) {
+            Borrower borrower = borrowerRepository.findById(borrowingDTO.borrowerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Borrower not found with id: " + borrowingDTO.borrowerId()));
             existingBorrowing.setBorrower(borrower);
         }
-        if (borrowingDTO.getBookId() != null) {
-            Book book = bookRepository.findById(borrowingDTO.getBookId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + borrowingDTO.getBookId()));
+        if (borrowingDTO.bookId() != null) {
+            Book book = bookRepository.findById(borrowingDTO.bookId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + borrowingDTO.bookId()));
             existingBorrowing.setBook(book);
         }
-        if (borrowingDTO.getBorrowedDate() != null) {
-            existingBorrowing.setBorrowedDate(borrowingDTO.getBorrowedDate());
+        if (borrowingDTO.borrowedDate() != null) {
+            existingBorrowing.setBorrowedDate(borrowingDTO.borrowedDate());
         }
-        if (borrowingDTO.getDueDate() != null) {
-            existingBorrowing.setDueDate(borrowingDTO.getDueDate());
-        }
-
-        if (borrowingDTO.getReturnedDate() != null) {
-            existingBorrowing.setReturnedDate(borrowingDTO.getReturnedDate());
+        if (borrowingDTO.dueDate() != null) {
+            existingBorrowing.setDueDate(borrowingDTO.dueDate());
         }
 
-        if (borrowingDTO.getStatus() != null) {
-            existingBorrowing.setStatus(Borrowing.BorrowingStatus.valueOf(borrowingDTO.getStatus()));
+        if (borrowingDTO.returnedDate() != null) {
+            existingBorrowing.setReturnedDate(borrowingDTO.returnedDate());
+        }
+
+        if (borrowingDTO.status() != null) {
+            existingBorrowing.setStatus(Borrowing.BorrowingStatus.valueOf(borrowingDTO.status()));
             if (existingBorrowing.getStatus().equals(Borrowing.BorrowingStatus.RETURNED)) {
                 Book book = existingBorrowing.getBook();
                 book.setStatus(Book.BookStatus.AVAILABLE);

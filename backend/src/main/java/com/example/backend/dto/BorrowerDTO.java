@@ -3,49 +3,46 @@ package com.example.backend.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class BorrowerDTO {
-    private Long borrowerId;
+public record BorrowerDTO(
+        Long borrowerId,
 
-    @NotBlank(message = "Name is required")
-    @Size(max = 255, message = "Name must be less than 255 characters")
-    private String name;
+        @NotBlank(message = "Name is required")
+        @Size(max = 255, message = "Name must be less than 255 characters")
+        String name,
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
-    private String email;
+        @NotBlank(message = "Email is required")
+        @Email(message = "Invalid email format")
+        String email,
 
-    @Size(max = 50, message = "Phone number must be less than 50 characters")
-    private String phone;
+        @Size(max = 50, message = "Phone number must be less than 50 characters")
+        String phone,
 
-    @Size(max = 255, message = "Address must be less than 255 characters")
-    private String address;
+        @Size(max = 255, message = "Address must be less than 255 characters")
+        String address,
 
-    @NotBlank(message = "Status is required")
-    private String status;
+        @NotBlank(message = "Status is required")
+        String status,
 
-    private Set<BorrowingDTO> borrowings;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+        Set<BorrowingDTO> borrowings,
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BorrowerSummaryDTO {
-        private Long id;
-        private String name;
-        private String email;
-        private String phone;
-        private String address;
-        private String status;
+        LocalDateTime createdAt,
+
+        LocalDateTime updatedAt
+) {
+    public BorrowerDTO withBorrowings(Set<BorrowingDTO> borrowings) {
+        return new BorrowerDTO(borrowerId, name, email, phone, address, status, borrowings, createdAt, updatedAt);
     }
+
+    public record BorrowerSummaryDTO(
+            Long id,
+            String name,
+            String email,
+            String phone,
+            String address,
+            String status
+    ) {}
 }

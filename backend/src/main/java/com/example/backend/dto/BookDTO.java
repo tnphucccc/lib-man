@@ -5,41 +5,38 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class BookDTO {
-    private Long bookId;
+public record BookDTO(
+        Long bookId,
 
-    @NotBlank(message = "Title is required")
-    @Size(max = 255, message = "Title must be less than 255 characters")
-    private String title;
+        @NotBlank(message = "Title is required")
+        @Size(max = 255, message = "Title must be less than 255 characters")
+        String title,
 
-    @NotBlank(message = "ISBN is required")
-    @Size(min = 10, max = 13, message = "ISBN must be between 10 and 13 characters")
-    private String isbn;
+        @NotBlank(message = "ISBN is required")
+        @Size(min = 10, max = 13, message = "ISBN must be between 10 and 13 characters")
+        String isbn,
 
-    @NotNull(message = "Publication year is required")
-    @Min(value = 1000, message = "Publication year must be at least 1000")
-    private Integer publicationYear;
+        @NotNull(message = "Publication year is required")
+        @Min(value = 1000, message = "Publication year must be at least 1000")
+        Integer publicationYear,
 
-    private Set<AuthorDTO.AuthorSummaryDTO> authors;
-    private String status;
-    private String coverImageUrl;
+        Set<AuthorDTO.AuthorSummaryDTO> authors,
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BookSummaryDTO {
-        private Long id;
-        private String title;
-        private String isbn;
-        private Book.BookStatus status;
+        String status,
+
+        String coverImageUrl
+) {
+    public BookDTO withAuthors(Set<AuthorDTO.AuthorSummaryDTO> authors) {
+        return new BookDTO(bookId, title, isbn, publicationYear, authors, status, coverImageUrl);
     }
+
+    public record BookSummaryDTO(
+            Long id,
+            String title,
+            String isbn,
+            Book.BookStatus status
+    ) {}
 }
