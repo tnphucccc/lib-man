@@ -34,6 +34,7 @@ public class BorrowingService implements IBorrowingService {
     private final LibraryMapper libraryMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<BorrowingDTO> getAllBorrowings() {
         logger.info("Fetching all borrowings from the database");
         List<Borrowing> borrowings = borrowingRepository.findAll();
@@ -44,6 +45,7 @@ public class BorrowingService implements IBorrowingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BorrowingDTO getBorrowingById(Long borrowingId) {
         logger.info("Fetching borrowing with id: {}", borrowingId);
         Borrowing borrowing = borrowingRepository.findById(borrowingId)
