@@ -30,12 +30,11 @@ public class AuthorService implements IAuthorService {
         logger.info("Fetching all authors from the database");
         return authorRepository.findByDeletedFalse().stream()
                 .map(author -> {
-                    AuthorDTO authorDTO = libraryMapper.toAuthorDTO(author);
                     List<Book> books = authorRepository.findActiveBooksByAuthorId(author.getAuthorId());
-                    authorDTO.setBooks(books.stream()
-                            .map(libraryMapper::toBookSummaryDTO)
-                            .collect(Collectors.toSet()));
-                    return authorDTO;
+                    return libraryMapper.toAuthorDTO(author)
+                            .withBooks(books.stream()
+                                    .map(libraryMapper::toBookSummaryDTO)
+                                    .collect(Collectors.toSet()));
                 }).collect(Collectors.toList());
     }
 
@@ -45,12 +44,11 @@ public class AuthorService implements IAuthorService {
         logger.info("Fetching author with id: {}", authorId);
         Author author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Author not found with id: " + authorId));
-        AuthorDTO authorDTO = libraryMapper.toAuthorDTO(author);
         List<Book> books = authorRepository.findBooksByAuthorId(author.getAuthorId());
-        authorDTO.setBooks(books.stream()
-                .map(libraryMapper::toBookSummaryDTO)
-                .collect(Collectors.toSet()));
-        return authorDTO;
+        return libraryMapper.toAuthorDTO(author)
+                .withBooks(books.stream()
+                        .map(libraryMapper::toBookSummaryDTO)
+                        .collect(Collectors.toSet()));
     }
 
     @Override
@@ -73,14 +71,14 @@ public class AuthorService implements IAuthorService {
             throw new IllegalStateException("Cannot update a deleted author");
         }
 
-        if (authorDTO.getName() != null) {
-            existingAuthor.setName(authorDTO.getName());
+        if (authorDTO.name() != null) {
+            existingAuthor.setName(authorDTO.name());
         }
-        if (authorDTO.getNationality() != null) {
-            existingAuthor.setNationality(authorDTO.getNationality());
+        if (authorDTO.nationality() != null) {
+            existingAuthor.setNationality(authorDTO.nationality());
         }
-        if (authorDTO.getPortraitUrl() != null) {
-            existingAuthor.setPortraitUrl(authorDTO.getPortraitUrl());
+        if (authorDTO.portraitUrl() != null) {
+            existingAuthor.setPortraitUrl(authorDTO.portraitUrl());
         }
 
         Author updatedAuthor = authorRepository.save(existingAuthor);

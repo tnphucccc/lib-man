@@ -37,12 +37,11 @@ public class BookService implements IBookService {
         logger.info("Fetching all books from the database");
         return bookRepository.findByDeletedFalse().stream()
                 .map(book -> {
-                    BookDTO bookDTO = libraryMapper.toBookDTO(book);
                     List<Author> authors = bookRepository.findAuthorsByBookId(book.getBookId());
-                    bookDTO.setAuthors(authors.stream()
-                            .map(libraryMapper::toAuthorSummaryDTO)
-                            .collect(Collectors.toSet()));
-                    return bookDTO;
+                    return libraryMapper.toBookDTO(book)
+                            .withAuthors(authors.stream()
+                                    .map(libraryMapper::toAuthorSummaryDTO)
+                                    .collect(Collectors.toSet()));
                 })
                 .collect(Collectors.toList());
     }
@@ -53,12 +52,11 @@ public class BookService implements IBookService {
         logger.info("Fetching book with id: {}", bookId);
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + bookId));
-        BookDTO bookDTO = libraryMapper.toBookDTO(book);
         List<Author> authors = bookRepository.findAuthorsByBookId(book.getBookId());
-        bookDTO.setAuthors(authors.stream()
-                .map(libraryMapper::toAuthorSummaryDTO)
-                .collect(Collectors.toSet()));
-        return bookDTO;
+        return libraryMapper.toBookDTO(book)
+                .withAuthors(authors.stream()
+                        .map(libraryMapper::toAuthorSummaryDTO)
+                        .collect(Collectors.toSet()));
     }
 
     @Override
@@ -66,15 +64,15 @@ public class BookService implements IBookService {
     public BookDTO createBook(BookDTO bookDTO) {
         logger.info("Creating a new book");
         Book book = new Book();
-        book.setTitle(bookDTO.getTitle());
-        book.setIsbn(bookDTO.getIsbn());
-        book.setPublicationYear(bookDTO.getPublicationYear());
-        if (bookDTO.getStatus() != null) {
-            book.setStatus(Book.BookStatus.valueOf(bookDTO.getStatus()));
+        book.setTitle(bookDTO.title());
+        book.setIsbn(bookDTO.isbn());
+        book.setPublicationYear(bookDTO.publicationYear());
+        if (bookDTO.status() != null) {
+            book.setStatus(Book.BookStatus.valueOf(bookDTO.status()));
         }
-        book.setCoverImageUrl(bookDTO.getCoverImageUrl());
+        book.setCoverImageUrl(bookDTO.coverImageUrl());
 
-        Set<Author> authors = getPersistedAuthors(bookDTO.getAuthors());
+        Set<Author> authors = getPersistedAuthors(bookDTO.authors());
         book.setAuthors(authors);
 
         Book savedBook = bookRepository.save(book);
@@ -92,27 +90,27 @@ public class BookService implements IBookService {
             throw new IllegalStateException("Cannot update a deleted book");
         }
 
-        if (bookDTO.getTitle() != null) {
-            existingBook.setTitle(bookDTO.getTitle());
+        if (bookDTO.title() != null) {
+            existingBook.setTitle(bookDTO.title());
         }
-        if (bookDTO.getIsbn() != null) {
-            existingBook.setIsbn(bookDTO.getIsbn());
+        if (bookDTO.isbn() != null) {
+            existingBook.setIsbn(bookDTO.isbn());
         }
-        if (bookDTO.getPublicationYear() != null) {
-            existingBook.setPublicationYear(bookDTO.getPublicationYear());
+        if (bookDTO.publicationYear() != null) {
+            existingBook.setPublicationYear(bookDTO.publicationYear());
         }
 
-        if (bookDTO.getAuthors() != null && !bookDTO.getAuthors().isEmpty()) {
-            Set<Author> authors = getPersistedAuthors(bookDTO.getAuthors());
+        if (bookDTO.authors() != null && !bookDTO.authors().isEmpty()) {
+            Set<Author> authors = getPersistedAuthors(bookDTO.authors());
             existingBook.setAuthors(authors);
         }
 
-        if (bookDTO.getStatus() != null) {
-            existingBook.setStatus(Book.BookStatus.valueOf(bookDTO.getStatus()));
+        if (bookDTO.status() != null) {
+            existingBook.setStatus(Book.BookStatus.valueOf(bookDTO.status()));
         }
 
-        if (bookDTO.getCoverImageUrl() != null) {
-            existingBook.setCoverImageUrl(bookDTO.getCoverImageUrl());
+        if (bookDTO.coverImageUrl() != null) {
+            existingBook.setCoverImageUrl(bookDTO.coverImageUrl());
         }
 
         Book updatedBook = bookRepository.save(existingBook);
@@ -134,13 +132,13 @@ public class BookService implements IBookService {
     private Set<Author> getPersistedAuthors(Set<AuthorDTO.AuthorSummaryDTO> authorDTOs) {
         Set<Author> persistedAuthors = new HashSet<>();
         for (AuthorDTO.AuthorSummaryDTO authorDTO : authorDTOs) {
-            Optional<Author> existingAuthor = authorRepository.findByName(authorDTO.getName());
+            Optional<Author> existingAuthor = authorRepository.findByName(authorDTO.name());
             if (existingAuthor.isPresent()) {
                 persistedAuthors.add(existingAuthor.get());
             } else {
                 Author newAuthor = new Author();
-                newAuthor.setName(authorDTO.getName());
-                newAuthor.setNationality(authorDTO.getNationality());
+                newAuthor.setName(authorDTO.name());
+                newAuthor.setNationality(authorDTO.nationality());
                 persistedAuthors.add(authorRepository.save(newAuthor));
             }
         }
