@@ -6,9 +6,9 @@ import com.example.backend.mapper.LibraryMapper;
 import com.example.backend.model.Author;
 import com.example.backend.model.Book;
 import com.example.backend.repository.AuthorRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,14 +16,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AuthorService implements IAuthorService {
     private static final Logger logger = LoggerFactory.getLogger(AuthorService.class);
 
-    @Autowired
-    private AuthorRepository authorRepository;
+    private final AuthorRepository authorRepository;
 
-    @Autowired
-    private LibraryMapper libraryMapper;
+    private final LibraryMapper libraryMapper;
 
     @Override
     @Transactional(readOnly = true)

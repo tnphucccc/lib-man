@@ -9,9 +9,9 @@ import com.example.backend.model.Borrowing;
 import com.example.backend.repository.BookRepository;
 import com.example.backend.repository.BorrowerRepository;
 import com.example.backend.repository.BorrowingRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,21 +20,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BorrowingService implements IBorrowingService {
 
     private static final Logger logger = LoggerFactory.getLogger(BorrowingService.class);
 
-    @Autowired
-    private BorrowingRepository borrowingRepository;
+    private final BorrowingRepository borrowingRepository;
 
-    @Autowired
-    private BookRepository bookRepository;
+    private final BookRepository bookRepository;
 
-    @Autowired
-    private BorrowerRepository borrowerRepository;
+    private final BorrowerRepository borrowerRepository;
 
-    @Autowired
-    private LibraryMapper libraryMapper;
+    private final LibraryMapper libraryMapper;
 
     @Override
     public List<BorrowingDTO> getAllBorrowings() {
