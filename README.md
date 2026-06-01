@@ -51,8 +51,8 @@ Only requires [Docker](https://docs.docker.com/get-docker/) installed.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/tnphucccc/LibMan.git
-   cd LibMan
+   git clone https://github.com/tnphucccc/lib-man.git
+   cd lib-man
    ```
 2. Start the full stack
    ```sh
@@ -74,7 +74,7 @@ Requires Java 17+, Maven, Node.js 20+, and PostgreSQL 16+.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/tnphucccc/LibMan.git
+   git clone https://github.com/tnphucccc/lib-man.git
    ```
 2. Set up the database
    ```sh
@@ -113,11 +113,11 @@ Requires Java 17+, Maven, Node.js 20+, and PostgreSQL 16+.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/tnphucccc/LibMan.svg?style=for-the-badge
-[contributors-url]: https://github.com/tnphucccc/LibMan/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/tnphucccc/LibMan.svg?style=for-the-badge
-[forks-url]: https://github.com/tnphucccc/LibMan/network/members
-[stars-shield]: https://img.shields.io/github/stars/tnphucccc/LibMan.svg?style=for-the-badge
-[stars-url]: https://github.com/tnphucccc/LibMan/stargazers
-[issues-shield]: https://img.shields.io/github/issues/tnphucccc/LibMan.svg?style=for-the-badge
-[issues-url]: https://github.com/tnphucccc/LibMan/issues
+[contributors-shield]: https://img.shields.io/github/contributors/tnphucccc/lib-man.svg?style=for-the-badge
+[contributors-url]: https://github.com/tnphucccc/lib-man/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/tnphucccc/lib-man.svg?style=for-the-badge
+[forks-url]: https://github.com/tnphucccc/lib-man/network/members
+[stars-shield]: https://img.shields.io/github/stars/tnphucccc/lib-man.svg?style=for-the-badge
+[stars-url]: https://github.com/tnphucccc/lib-man/stargazers
+[issues-shield]: https://img.shields.io/github/issues/tnphucccc/lib-man.svg?style=for-the-badge
+[issues-url]: https://github.com/tnphucccc/lib-man/issues
